@@ -1,0 +1,652 @@
+@import 'compass/utilities/general/clearfix';
+@import 'zen/grids';
+@import 'utils';
+
+//$content-width: 235px;
+$content-width: 205px; // New experimental width (to fit mobile)
+$border-width: 5px;
+$button-height: 75px;
+$button-width: 71px;
+$progress-width: 16px;
+$progress-height: 16px;
+$arrow-size: 10px;
+$theme-path: '/sites/all/themes/fkb/';
+
+//
+// mixin: Small action button
+//
+@mixin small-action-button {
+  margin: 0;
+  .toggler {
+    display: block;
+    background-image: url('#{$theme-path}images/sprite--pointer.png'); 
+    background-repeat: no-repeat;
+    background-position: -10px 0;
+    height: 10px;
+    width: 10px;
+    margin: 4px 0 0 0;
+  }
+  .action-button-title {
+    padding: 0 0 0 5px;
+  }
+  .action-container {
+    height: 17px;
+    .action-arrow {
+      left: 71px;
+    }
+    .action-content {
+      left: 81px;
+    }
+  }
+  .ajax-progress {
+    left: -3px;
+    top: -1px;
+    .throbber {
+      background: url('#{$theme-path}animations/ajax-loader-green-pos.gif');
+    }    
+  }
+  
+  &.open {
+    .toggler {
+      background-position: -10px -10px;
+    }
+  }
+  &.lefty {
+    .action-container {
+      .action-arrow {
+        left: -20px;
+      }
+      .action-content {
+        left: -$content-width - 30;
+      }
+    }    
+  }
+}
+
+// ------------------------------------------------------------------------------------------ //
+// Generic styles                                                                             //
+// ------------------------------------------------------------------------------------------ //
+
+.action-button {
+  @include pie-clearfix;
+  position: relative;
+  display: block; // vertical hacks.
+
+  .toggler-image {
+    display: block;
+    float: left;
+    width: $button-width;
+    height: $button-height;
+    background-image: url('#{$theme-path}images/sprite--action-button--invers.png');
+  }
+  
+  // Defeat standard styles from views.css and base.css
+  // .view .progress-disabled {float:none}
+  & > .progress-disabled {
+    float: left !important;
+  }
+
+  .action-button-title {
+    display: block;
+    float: left;
+    padding: 30px 0 30px 30px;
+    .toggler-text {
+      text-decoration: none;
+      color: #333;
+    }
+  }
+
+  .ajax-progress {
+    position: absolute;
+    display: block;
+    left: ($button-width - $progress-width) / 2;
+    top: 28px;
+    .throbber {
+      margin: 0px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .action-container {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: $button-height;
+  }
+
+  .action-arrow {
+    border-top: $arrow-size solid transparent;
+	  border-bottom: $arrow-size solid transparent;
+    border-right: $arrow-size solid $green;
+    width: 0;
+    height: 0;
+
+    position: absolute;
+    top: 50%;
+    margin-top: -$arrow-size;
+
+    left: $button-width + 10;
+
+    z-index: 20;
+  }
+
+  .action-content {
+    position: absolute;
+    left: $button-width + $arrow-size + 10;
+
+    padding: 0;
+    margin: 0;
+
+    border: $border-width solid $green;
+
+    z-index: 10;
+
+    box-shadow: 0 0 25px rgba(0,0,0,.33);
+    -webkit-box-shadow: 0 0 25px rgba(0,0,0,.33);
+    -moz-box-shadow: 0 0 25px rgba(0,0,0,.33);
+
+    // Don't mind about IE8 
+    // - it doesn't support shadows any way  
+
+    /*
+    box-shadow: 0 0 25px #a9a9a9;
+    -webkit-box-shadow: 0 0 25px #a9a9a9;
+    -moz-box-shadow: 0 0 25px #a9a9a9;
+    */
+    
+    background-color: #eee;
+    width: $content-width;
+    
+    /*.action-message,*/
+    .action-list {
+      a {
+        color: $dark;
+        text-decoration:none;
+        padding: 0 10px;
+        display: block;
+        line-height: 27px;
+      }
+
+      a:hover {
+        color: $green-dark; // get the color from default.
+      }
+      #user-login {
+        .field-name-field-ding-body, h1 {
+          display: none;
+        }
+      }
+    }
+    
+    .action-message {
+      padding: 5px 10px;
+      display: none;
+      background-color: #fff;
+    }
+  }
+
+  &.open {
+    .toggler-image {
+      background-position: 0 -75px;
+    }
+    .action-container {
+      display: block;
+    }
+  }
+  
+  &.result {
+    .action-container {
+      display: block;
+      
+      .action-message {
+        display: block;
+      }
+      .action-list {
+        display: none;
+      }
+    }
+  }
+
+  &.lefty {
+    .action-arrow {
+      border-top: $arrow-size solid transparent;
+      border-bottom: $arrow-size solid transparent;
+      border-left: $arrow-size solid $green;
+      border-right: 0 none;
+
+      left: -$arrow-size - 10;
+    }
+
+    .action-content {
+      left: -($content-width + $arrow-size + $border-width * 2) - 10;
+    }
+  }
+  
+  // 
+  // ----------------------------------------------------------------------
+  // Overrides
+  // ----------------------------------------------------------------------
+  //
+  
+  &.action-button-type-ding-event {
+    .toggler-image {
+      //background-image: url('#{$theme-path}images/sprite--action-button--orange.png');
+    }
+    .action-list a:hover {
+      color: $orange-dark;
+    }
+    .action-arrow {
+      border-right-color: $orange;
+    }
+    .action-content {
+      border-color: $orange;
+    }
+    &.lefty {
+      .action-arrow {
+        border-left-color: $orange;
+      }      
+    }    
+  }
+  &.action-button-type-ding-news {
+    .toggler-image {
+      //background-image: url('#{$theme-path}images/sprite--action-button--blue.png');
+    }
+    .action-list a:hover {
+      color: $blue-dark;
+    }
+    .action-arrow {
+      border-right-color: $blue;
+    }
+    .action-content {
+      border-color: $blue;
+    }
+    &.lefty {
+      .action-arrow {
+        border-left-color: $blue;
+      }      
+    }    
+  }
+  &.action-button-type-blog-post {
+    .toggler-image {
+      //background-image: url('#{$theme-path}images/sprite--action-button--yellow.png');
+    }
+    .action-list a:hover {
+      color: $yellow-dark;
+    }
+    .action-arrow {
+      border-right-color: $yellow;
+    }
+    .action-content {
+      border-color: $yellow;
+    }
+    &.lefty {
+      .action-arrow {
+        border-left-color: $yellow;
+      }      
+    }
+  }
+  &.action-button-type-account,
+  &.action-button-type-login {
+    .toggler-image {
+      background-image: url('#{$theme-path}images/sprite--action-button--profile.png');
+    }
+    .action-button-title {
+      padding-left: 15px;
+    }
+    .action-list a:hover {
+      color: #999999;
+    }
+    .action-arrow {
+      border-right-color: $dark;
+    }
+    .action-content {
+      border-color: $dark;
+    }
+    &.lefty {
+      .action-arrow {
+        border-left-color: $dark;
+      }
+    }
+  }
+}
+
+// 
+// ----------------------------------------------------------------------
+// Action forms and messages
+// ----------------------------------------------------------------------
+//
+.action-button /*.action-message*/ {
+  
+  form {
+    padding: 10px;
+    a {
+      color: $dark;
+      text-decoration: none;
+      &:hover {
+        color: $grey;
+      }
+    }
+    .form-item {
+      margin-bottom: 1em;
+      label {
+        font-size: 0.85em;
+        font-weight: normal;
+        color: $dark;
+        .form-required {
+          display: none;
+        }
+      }
+      input {
+        background: $form-input-background;
+        font-family: $regular;
+        font-size: 1em;
+        border: 1px solid #{$form-input-border};
+        margin: 0.25em 0;
+        padding: 0.5em;
+        width: $content-width - 35;
+        &:focus {
+          outline: none;
+          border-color: $green;
+        }
+        &.form-checkbox {
+          width: auto;
+          margin: 0 3px .75em 0;
+          padding: 0;
+          vertical-align: baseline;
+        }
+        &.error {
+          color: $dark;
+        }
+      }
+      select {
+        width: $content-width - 20;
+        margin: .5em 0;
+      }
+      .description {
+        line-height: 1.5em;
+        margin: 0;
+      }
+    }
+    .form-submit {
+      font-family: $regular;
+      @include header-4;
+      line-height: 24px;
+      text-align: left;
+      border: 0;
+      margin: 0;
+      padding: 0 0 0 38px;
+      background: transparent url('#{$theme-path}images/sprite--icons.png') no-repeat -24px 0;
+      cursor: pointer;
+    }
+
+    // Inline submit 
+    &.link-form {
+      padding: 6px 10px;
+      .form-submit {
+        padding-left: 0;
+        background: none;
+        max-width: $content-width - 20;
+        white-space: normal;
+        color: $dark;
+      }
+    } 
+
+    // Ajax throbber for forms
+    .ajax-progress {
+      position: static;
+      float: right;
+      margin: 0;
+      .throbber {
+        float: right;
+      }
+      .message {
+        display: none;
+      }
+    }
+
+    // Special case
+    
+    h1.article-title {
+      display: none;
+    }
+    
+    .form-item-provider-options-alma-preferred-branch label {
+      display: inline;
+    }
+    
+    .field-name-field-ding-body {
+      margin: 14px -10px -14px -10px;
+      padding: 1px 0;
+    
+      .field-item p {
+        background: white;
+        border-top: 1px solid #EEE;
+        margin: 0 0;
+        padding: 0 10px;
+        line-height: 27px;
+      }
+    }
+  }
+
+  // Messages
+  .messages {
+    border: 0;
+    padding: 10px;
+    margin: 0;
+    background: none;
+    color: $dark;
+    a {
+      padding: 0;
+      text-decoration: underline;
+    }
+    ul {
+      padding: 0;
+      margin: 0;
+      li {
+        list-style-type: none;
+      }
+    }
+  }
+  
+  // Remove padding from forms + messages when presented in a message area
+  .action-message form {
+    padding: .5em 0;
+  }
+  .action-message .messages {
+    @include small-txt;
+    padding: .5em 0;
+    a {
+      color: $dark;
+      &:hover {
+        color: $grey;
+      }
+    }
+  }
+}
+
+//
+// ----------------------------------------------------------------------
+// Action button throbbers
+// ----------------------------------------------------------------------
+//
+
+.action-list {
+  .ajax-progress {
+    left: -69px;
+    top: 32px;
+  }
+}
+
+.action-button-type-tingentity {
+  .ajax-progress {
+    .throbber {
+      background: url('#{$theme-path}animations/ajax-loader-green.gif');
+    }
+  }
+}
+.action-button-type-ding-list {
+  @extend .action-button-type-tingentity;
+}
+.action-button-type-term {
+  @extend .action-button-type-tingentity;
+}
+
+.action-button-type-ding-event {
+  .ajax-progress {
+    .throbber {
+      background: url('#{$theme-path}animations/ajax-loader-orange.gif');
+    }
+  }
+}
+.action-button-type-blog-post {
+  .ajax-progress {
+    .throbber {
+      background: url('#{$theme-path}animations/ajax-loader-yellow.gif');
+    }
+  }
+}
+.action-button-type-ding-news {
+  .ajax-progress {
+    .throbber {
+      background: url('#{$theme-path}animations/ajax-loader-blue.gif');
+    }
+  }
+}
+.action-button-type-login,
+.action-button-type-account {
+  .ajax-progress {
+    background: white;
+    .throbber {
+      background: url('#{$theme-path}animations/ajax-loader-green-pos.gif');
+    }
+  }
+}
+
+.action-button-type-account,
+.action-button-type-account a,
+.action-button-type-account a.toggler-text {
+  color: #fff;
+}
+
+/*
+.action-button.action-button-type-account a.toggler-image,
+.action-button.action-button-type-login a.toggler-image {
+  background-image: url('http://www.server003.b14cms.dk/users/fkb.dk/ding2/sites/all/themes/fkb/images/sprite--action-button--profile.png');
+}
+
+
+.action-button-type-tingentity a.toggler-image,
+.action-button-type-account.action-button-reservations-ready a.toggler-image,
+.view-ding-lists .action-button a.toggler-image,
+.ting-object .action-button a.toggler-image {
+  background-image: url('http://www.server003.b14cms.dk/users/fkb.dk/ding2/sites/all/themes/fkb/images/sprite--action-button--green.png');
+}
+
+.node-ding-event .action-button a.toggler-image {
+  background-image: url('http://www.server003.b14cms.dk/users/fkb.dk/ding2/sites/all/themes/fkb/images/sprite--action-button--orange.png');
+}
+
+.node-ding-news .action-button a.toggler-image {
+  background-image: url('http://www.server003.b14cms.dk/users/fkb.dk/ding2/sites/all/themes/fkb/images/sprite--action-button--blue.png');
+}
+.node-blog-post .action-button a.toggler-image {
+  background-image: url('http://www.server003.b14cms.dk/users/fkb.dk/ding2/sites/all/themes/fkb/images/sprite--action-button--yellow.png');
+}
+*/
+
+.action-list {
+  padding: 0;
+  margin: 0;
+}
+.action-list li {
+  list-style-type: none;
+  background-color:#fff;
+  margin: 1px 0;
+}
+.action-list li.first {margin-top: 0}
+.action-list li.last {margin-bottom: 0}
+
+// .action-list li a:hover {
+  // background-color:#fff;
+// }
+
+// ------------------------------------------------------------------------------------------ //
+// High resolution devices                                                                    //
+// ------------------------------------------------------------------------------------------ //
+
+@mixin resolution-high {
+  .action-button {
+    .toggler-image {
+      background-size: 100%;
+      background-image: url('#{$theme-path}images/sprite--action-button--invers@2x.png');
+    }
+  }
+}
+
+@include faxe-make-resolution-queries;
+
+// ------------------------------------------------------------------------------------------ //
+// View mode / responsive adjustments                                                         //
+// ------------------------------------------------------------------------------------------ //
+
+.view-mode-list-item-thin, .view-mode-list-item-short {
+  .action-button {
+    @include small-action-button;
+    float: right;
+  }
+}
+
+@mixin layout-medium {
+  .view-mode-search-result {
+    .actions {
+      .action-button {
+        padding-top: 3.6em;
+        @include small-action-button;
+        float: right;
+      }
+    }
+  }
+}
+
+@mixin layout-pad {
+  .view-mode-list-item {
+    .actions {
+      .action-button {
+        @include small-action-button;
+        float: right;
+      } 
+    }    
+  }
+  .view-mode-search-result {
+    .actions {
+      .action-button {
+        //padding-top: 3em;
+        @include small-action-button;
+        float: right;        
+      }
+    }
+  }
+}
+
+@mixin layout-mobile {
+  .view-mode-list-item {
+    .actions {
+      .action-button {
+        @include small-action-button;
+        float: left;
+      } 
+    }    
+  }
+  .view-mode-search-result {
+    .actions {
+      .action-button {
+        //padding-top: 3em;
+        @include small-action-button;
+        float: left;        
+      }
+    }
+  }  
+}
+
+@include faxe-make-media-queries;

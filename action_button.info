@@ -1,0 +1,10 @@
+; $Id$
+name = Action button
+description = Ajax driven button and inline message box. Actions are collected via hook and context.
+core = 7.x
+version = "7.x-1.0-dev"
+package = b14site
+;files[] = more_button.module
+;scripts[] = js/emptyModule.js
+;stylesheets[all][] = css/action_button.css
+stylesheets[all][] = css/action_button.scss

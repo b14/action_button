@@ -1,0 +1,45 @@
+/*
+  @todo PBJ
+    Finder ud af hvilken styles der hører til i denne fil, og rykker ellers andre
+    til action_button.scss i themes folderen.
+    Check også absolutte URLer til img
+*/
+
+/*
+ *
+ * This css file shouldn't be here, it should be in a theme instead.
+ *
+ *
+ * (also the current css is pretty much just hacked in there)
+ *
+ * So only a few very standard styles should be set here.
+ */
+ 
+/*
+.action-button {
+  position: relative;
+  height: 111px;
+  width: 100px;
+}
+*/
+/*
+.action-button a.toggler-image {
+  position: absolute;
+  top: 18px;  (120 - 74) / 2 
+  left: 0;
+  
+  padding: 0 0 0 100px;
+  height: 74px;
+  line-height: 74px;
+  
+  z-index: 1;
+  
+  background-repeat: no-repeat;
+  outline: none;
+  text-decoration: none;
+  color: #333;
+  width: 268px;
+  width: 85px;
+}
+*/
+
