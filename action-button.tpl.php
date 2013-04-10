@@ -12,7 +12,7 @@
  * @see template_preprocess_action_button()
  */
 ?>
-<div id="<?php print $id; ?>" class="<?php print $classes; ?>">
+<div id="<?php print $id; ?>" class="<?php print $classes; ?>"<?php if (isset($ref)) { print ' ref="' . $ref . '"'; } ?>>
   <?php print $button; ?>
   <?php print $action_message; ?>
   <?php print $action_arrow; ?>

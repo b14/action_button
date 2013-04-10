@@ -3,7 +3,11 @@
 
 (function ($) {
   'use strict';
+
+
   var Ding = Ding || {};
+  Drupal.ajax = Drupal.ajax || {};
+
   // Action button class
   Ding.ActionButton = function(element, options) {
     var $elem = $(element),
@@ -23,75 +27,100 @@
         _distance = 0,
         _content_height = $content.outerHeight(true),
         _container_height = $elem.height(),
-        _content_top = Math.floor((_container_height - _content_height) / 2);
+        _content_top = Math.floor((_container_height - _content_height) / 2),
+        header_height = $('header#header').height();
+
+      if ($('header#header').css('position') == 'static') {
+        header_height = 0;
+      }
 
       $content.css('top', _content_top);
-      
-      // if (true || _content_height > _container_height) {
-        _distance = $content.offset().top - _scrollTop;
-        
-        if (_distance < $('header#header').height() && _distance > 0) {
-          if (_content_height > _container_height) {
-            $content.css('top', Math.min(
-              0,
-              _content_top + Math.abs(_distance - $('header#header').height())
-            ));
-          } else {
-            $content.css('top', Math.min(
-              (_container_height - _content_height) * 2,
-              _content_top + Math.abs(_distance - $('header#header').height())
-            ));
-          }
-        } else if (_distance + _content_height > $(window).height()) {
-          if (_content_height > _container_height) {
-            $content.css('top', Math.max(
-              _container_height - _content_height,
-              _content_top - ((_distance + _content_height) - $(window).height())
-            ));
-          } else {
-            $content.css('top', Math.max(
-              (_content_height - _container_height) - 1,
-              _content_top - ((_distance + _content_height) - $(window).height())
-            ));
-          }
+
+      _distance = $content.offset().top - _scrollTop;
+
+      if (_distance < header_height && _distance > 0) {
+        if (_content_height > _container_height) {
+          $content.css('top', Math.min(
+            0,
+            _content_top + Math.abs(_distance - header_height)
+          ));
+        } else {
+          $content.css('top', Math.min(
+            (_container_height - _content_height) * 2,
+            _content_top + Math.abs(_distance - header_height)
+          ));
         }
-        else if (_distance < 0) {
+      } else if (_distance + _content_height > $(window).height()) {
+        if (_content_height > _container_height) {
+          $content.css('top', Math.max(
+            _container_height - _content_height,
+            _content_top - ((_distance + _content_height) - $(window).height())
+          ));
+        } else {
+          $content.css('top', Math.max(
+            (_content_height - _container_height) - 1,
+            _content_top - ((_distance + _content_height) - $(window).height())
+          ));
+        }
+      }
+      else if (_distance < 0) {
+        if ($content.closest('#header').length > 0) {
           $content.css('top', Math.min(
             0,
             _content_top + Math.abs(_distance)
           ));
+        } else {
+          $content.css('top', 0);
         }
-      // }
+      }
 
-      $elem.removeClass('lefty');
+      $content.css('left', '');
+      $elem.removeClass('lefty center');
       if ($content.outerWidth(true) + $content.offset().left > $(window).width()) {
-        $elem.addClass('lefty');
+        if ($elem.offset().left - $content.outerWidth(true) > 0) {
+          $elem.addClass('lefty');
+        } else {
+          $elem.addClass('center');
+          $content.css('left', ((($(window).width() - $content.outerWidth(true)) / 2) - $elem.offset().left) + 'px');
+        }
       }
     }
-    
+
     return {
       setup: function() {
         // Set the toggler to perform the opening and closing of the list.
         // Note that the ajax API takes care of loading.
         $link.click(function (e) {
           // Close all other open action buttons
-          $('.action-button.result, .action-button.open, .action-button-group.open').not($elem).removeClass('open result');
+          var $other_buttons = $('.action-button.result, .action-button.open, .action-button-group.open').not($elem); //.removeClass('open result');
+          $other_buttons.removeClass('result open')
+
+          if ($other_buttons.hasClass('group-button')) {
+            $other_buttons.actionbutton().reset();
+          }
 
           $elem.removeClass('result');
 
           if (!$elem.hasClass('processed')) {
             $elem.find('.action-list').html('');
+            $elem.removeClass('open');
           } else {
             if ($elem.hasClass('open')) {
               $elem.removeClass('open');
               $('body').unbind('click', bodyClicker);
+              if ($elem.hasClass('group-button')) {
+                $elem.find('.action-list').html('');
+              }
             } else {
               $elem.addClass('open');
               _set_list_position();
               $('body').bind('click', bodyClicker);
             }
           }
-          $elem.addClass('processed');
+
+          if (!$elem.hasClass('group-button')) {
+            $elem.addClass('processed');
+          }
         });
 
         // Set the toggler text holder to do the same as the actual toggler.
@@ -146,12 +175,45 @@
 
   function bodyClicker(e) {
     if ($(e.target).closest('.action-button').length === 0) {
-      $('.action-button.open, .action-button.result')
-        .removeClass('result open');
+      var $action_button = $('.action-button.open, .action-button.result');
+      $action_button.removeClass('result open')
+
+      if ($action_button.hasClass('group-button')) {
+        $action_button.actionbutton().reset();
+      }
       $('body').unbind('click', bodyClicker);
     }
   }
-
+  /**
+   * Attaches the behavior handling the action buttons.
+   *
+   * This Includes both setting up the actual action button, and the action
+   * menu lists.
+   */
+  Drupal.behaviors.checkbox_handler = {
+    attach: function (context, settings) {
+      $("div[class='checkbox-wrapper']", context).addClass("unchecked");
+      $(".checkbox-wrapper", context).each(function() {
+        if($(this).children("input").attr("checked")) {
+          $(this).removeClass("unchecked");
+    			$(this).addClass("checked");
+        }
+      });
+    	$(".checkbox-wrapper", context).click(function(){
+    		if($(this).children("input").attr("checked")){
+    			// uncheck
+    			$(this).children("input").attr({checked: ""});
+    			$(this).removeClass("checked");
+    			$(this).addClass("unchecked");
+    		}else{
+    			// check
+    			$(this).children("input").attr({checked: "checked"});
+    			$(this).removeClass("unchecked");
+    			$(this).addClass("checked");
+    		}
+    	});
+    }
+  }
   /**
    * Attaches the behavior handling the action buttons.
    *
@@ -160,26 +222,48 @@
    */
   Drupal.behaviors.action_button_handler = {
     attach: function (context, settings) {
+      
       //
       // Setup the action buttons.
       // We should change the action-button-group to something else when group
       // is implemented.
       $('.action-button', context).each(function (i, action_button) {
-        var $linkId = $(this).actionbutton().getLinkId();
-        if(Drupal.ajax[$linkId])
-          Drupal.ajax[$linkId].eventResponse = customEventResponse;
+        var
+          $action_button = $(action_button),
+          link_id = $action_button.actionbutton().getLinkId();
+
+        if(Drupal.ajax[link_id]) {
+          Drupal.ajax[link_id].eventResponse = customEventResponse;
+
+          if ($action_button.hasClass('group-button')) {
+            var beforeSerialize = Drupal.ajax[link_id].beforeSerialize;
+            Drupal.ajax[link_id].beforeSerialize = function (element, options) {
+              beforeSerialize(element, options);
+              groupBeforeSerialize(options, $action_button.attr('ref'));
+            }
+          }
+        }
       });
+
       if(settings.message && settings.selector) {
         $(settings.selector).actionbutton().setMessage(settings.message);
         // Drupal.attachBehaviors($(settings.selector), settings);
       }
+
+      if (settings.extra_class) {
+        if (settings.selector) {
+          $(settings.selector).addClass(settings.extra_class);
+        }
+      }
+
       // Refresh means that next time you open the specific actionbutton, the
       // list should refresh and not use the list cached in the DOM.
       if (settings.refresh === true) {
-        if(settings.selector)
+        if(settings.selector) {
           $(settings.selector).actionbutton().reset();
-        else
+        } else {
           $(context).closest('.action-button').actionbutton().reset();
+        }
       }
       // This removes a selector.
       // Looks for the selector by going upwards through the DOM tree (starting
@@ -203,47 +287,21 @@
         $action_button.actionbutton().set_list_position();
 
         $('body').bind('click', bodyClicker);
-      }
 
-      /*
-
-       WAIT WITH GROUP FUNCTIONALITY.
-
-       There's a lot of trouble with attaching and detaching, because we don't know the
-
-      $('.action-list-group-item', context).each(function (i, item) {
-        var $item = $(item);
-
-        // If it's a callback function, prevent any default behavior and
-        // do an ajax call instead.
-        if ($item.hasClass('callback')) {
-          $item.click(function (e) {
+        if ($action_button.hasClass('group-button')) {
+          $('.action-list-item', $action_button).each(function (i, item) {
             var
-              // Get all checked fields in the same group as the action button.
-              $checked = $('input[name="' + $item.attr('ref') +'"]:checked'),
-              ids = [];
+              $item = $(item),
+              link_id = $item.attr('id'),
+              beforeSerialize = Drupal.ajax[link_id].beforeSerialize;
 
-            // If there's no checkboxes selected select all in the group.
-            if ($checked.length === 0) {
-              $checked = $('input[name="' + $item.attr('ref') +'"]');
-            }
-
-            // Create the action id list.
-            $checked.each(function (i, checkbox) {
-              ids.push($(checkbox).val());
-            });
-
-            $.getJSON($(this).attr('href').replace('REPLACE_ME', ids.join(',')), function (data) {
-              action_button_ajax_success($item.closest('.action-button'), data);
-            });
-
-            // console.log($(this).attr('href').replace('REPLACE_ME', ids.join(',')));
-
-            e.preventDefault();
+              Drupal.ajax[link_id].beforeSerialize = function (element, options) {
+                beforeSerialize(element, options);
+                groupBeforeSerialize(options, $action_button.attr('ref'));
+              }
           });
         }
-      });
-      */
+      }
 
       // Make sure the action button is placed correct while scrolling.
       // The timeout is so we're sure this scroll event always is called last
@@ -252,14 +310,15 @@
         $(window)
           .unbind('scroll', onScroll)
           .bind('scroll', onScroll);
+          
+          onScroll();
       }, 0);
-
-      return;
+      onScroll();
     }
   };
   
-  function onScroll(e) {  
-    $('.action-button.open').each(function (i, action_button) {
+  function onScroll(e) {
+    $('.action-button.open, .action-button.result').each(function (i, action_button) {
       $(action_button).actionbutton().set_list_position();
     });
   }
@@ -301,6 +360,27 @@
     }
   }
 
+  function getGroupIds(group) {
+    var
+      ids = [],
+      $checked = $('input[name="' + group +'"]:checked');
+
+    if ($checked.length === 0) {
+      $checked = $('input[name="' + group +'"]');
+      ids.push('all');
+    }
+
+    $checked.each(function (i, checkbox) {
+      ids.push($(checkbox).val());
+    });
+
+    return ids;
+  }
+
+  function groupBeforeSerialize(options, group) {
+    options['data']['ids'] = getGroupIds(group);
+  }
+
 
   /**
    * A custom eventResponse, we use for our Drupal.AJAX objects.
@@ -310,11 +390,16 @@
    * own processed class so we can use the DOM cache.
    */
   function customEventResponse(element, event) {
-    var ajax = this;
+    var
+      ajax = this,
+      $action_button = $(element).closest('.action-button');
 
     // This is the only difference.
     // Do not perform another ajax command if one is already in progress.
-    if (ajax.ajaxing || $(element).closest('.action-button').hasClass('processed')) {
+    if (ajax.ajaxing
+      || ($action_button.hasClass('processed') && !$action_button.hasClass('group-button'))
+      || ($action_button.hasClass('group-button') && $action_button.hasClass('open'))
+    ) {
       return false;
     }
 

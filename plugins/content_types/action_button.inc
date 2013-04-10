@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * 
+ */
 
 // @todo
 //   Jeg forstår ikke CTools plugins systemet. Hvordan før jeg det muligt at tilføje action_button

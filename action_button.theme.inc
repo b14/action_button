@@ -19,7 +19,10 @@
  */
 function theme_action_button_checkbox($variables) {
   $id_name = drupal_html_class($variables['group']);
-  return '<input type="checkbox" name="' . $variables['group'] . '" value="' . $variables['id'] . '" />';
+  $html = '<div class="checkbox-wrapper">';
+  $html .= '<input type="checkbox" name="' . $variables['group'] . '" value="' . $variables['id'] . '" class="group_checker" />';
+  $html .= '<label>' . t('Choose') . '</label></div>';
+  return $html;
 }
 
 /**
@@ -62,9 +65,12 @@ function template_preprocess_action_button(&$variables) {
   $query['html_id'] = $variables['id'];
   
   // If the action button is a group button.
-  if (isset($context['group']) && !empty($context['group'])) {
+  // if (isset($context['group']) && !empty($context['group'])) {
+  if (!empty($variables['group'])) {
     $variables['classes_array'][] = 'group-button';
-    $query['group'] = $context['group'];
+    $query['group'] = $variables['group'];
+    
+    $variables['ref'] = $variables['group'];
   }
   
   // Create the button (link), and the action list element.

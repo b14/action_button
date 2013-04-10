@@ -1,8 +1,4 @@
 <?php
-
-// @todo PBJ
-//   Gør group funktionaliteten klar.
-
 /**
  * @file
  * A button that will load a small menu ajax time, when told.
@@ -58,7 +54,9 @@ function action_button_fetch_list($ajax) {
   catch (Exception $e) {
     if ($e instanceof DingProviderAuthException) {
       drupal_set_message($e->getMessage());
-      $commands[] = ajax_command_redirect('<front>');
+      ctools_include('ajax');
+      ctools_add_js('ajax-responder');
+      $commands[] = ctools_ajax_command_redirect('<front>');
       return array(
         '#type' => 'ajax',
         '#commands' => $commands,
@@ -117,7 +115,7 @@ function action_button_theme($existing, $type, $theme, $path) {
 function action_button_render_list($context) {
   // Get the items.
   $items = module_invoke_all('action_button_list', $context);
-  if(empty($items)) {
+  if (empty($items)) {
     $items[] = array(
       '#type' => 'markup',
       '#markup' => t('There are no actions avaiable for this item'),
@@ -147,13 +145,14 @@ function action_button_render_list($context) {
     }
     // If it's a group button, give the list items another class.
     elseif (!empty($context['group'])) {
-      $classes[] = 'action-list-group-item';
+      // $classes[] = 'action-list-group-item';
+      $classes[] = 'action-list-item';
       $group_val = $context['group'];
     }
     
     // To allow easier creation of links as action commands, we set up some
     // default values for every render array with the #theme link.
-    if($item['#theme'] == 'link') {
+    if ($item['#theme'] == 'link') {
       // The link theme needs the following options, so add them if they're
       // not present already.
       if (!isset($item['#options'])) {
@@ -165,13 +164,13 @@ function action_button_render_list($context) {
       );
       
       // Add the classes
-      if(!empty($item['#options']['attributes']['class']) && is_array($item['#options']['attributes']['class']))
+      if (!empty($item['#options']['attributes']['class']) && is_array($item['#options']['attributes']['class']))
         $item['#options']['attributes']['class'] = array_merge($item['#options']['attributes']['class'], $classes);
       else
         $item['#options']['attributes']['class'] = $classes;
       
       // Set the group reference if it's a group.
-      if(!empty($group_val)) {
+      if (!empty($group_val)) {
         $item['#options']['attributes']['ref'] = $group_val;
       }
       
@@ -182,22 +181,21 @@ function action_button_render_list($context) {
         $item['#path'] = $item['#callback']; //'action_button/callback/' . $item['callback'];
         $item['#options']['query'] = $context; // Har vi brug for hele context, eller kan vi nøjes med id?
         $item['#options']['attributes']['class'][] = 'use-ajax';
-        if(empty($item['#options']['attributes']['id'])) {
+        if (empty($item['#options']['attributes']['id'])) {
           $item['#options']['attributes']['id'] = drupal_html_id('action-link');
         }
       }
-      if(isset($context['destination'])) {
+      if (isset($context['destination'])) {
         $item['#options']['query']['destination'] = $context['destination'];
       }
     }
     // If it's not a link theme, just add 
     else {
-      // @todo PBJ (Test med render arrays i stedet for links, som med reservation formen).
       // Add some classes to the render array (BUT how do we know the render
       // array support classes)
       $item['attributes']['class'] = $classes;
       // What do we do with render arrays that are not a link?
-      if(isset($group_val)) {
+      if (isset($group_val)) {
         $item['attributes']['ref'] = $group_val;
       }
     }
@@ -205,31 +203,6 @@ function action_button_render_list($context) {
     // Add the rendered item to the item array.
     $list_items[]['data'] = render($item);
   }
-  
-  /*
-  // [[
-  global $user;
-  if ($user->uid == 0) {
-    // @todo add support for user/login here.
-    module_load_include('inc', 'ding_user', 'ding_user.pages');
-    if ($user->uid) {
-      $title = t('Authenticate');
-      $form_id = 'ding_user_authenticate_form';
-    }
-    else {
-      $title = t('Login');
-      $form_id = 'user_login';
-    }
-    $form_state = array(
-      'ajaxify' => TRUE,
-    );
-    $form = drupal_build_form($form_id, $form_state);
-    // dpm($form);
-    $list_items[]['data'] = render($form);
-  }
-  // ]]
-  */
-  
   
   // Return the html for the list.
   return theme(
@@ -245,11 +218,5 @@ function action_button_render_list($context) {
  * Implements hook_ctools_plugin_directory()
  */
 function action_button_ctools_plugin_directory($owner, $plugin_type) {
-    return 'plugins/' . $plugin_type;
-}
-
-function action_button_ajax_render_alter($commands) {
-  // dpm($commands);
-  // Inject any new status messages into the content area.
-  //$commands[] = ajax_command_prepend('#block-system-main .content', theme('status_messages'));
+  return 'plugins/' . $plugin_type;
 }

@@ -6,4 +6,4 @@ version = "7.x-1.0-dev"
 package = b14site
 ;files[] = more_button.module
 ;stylesheets[all][] = css/action_button.css
-stylesheets[all][] = css/action_button.scss
+;stylesheets[all][] = css/action_button.scss
